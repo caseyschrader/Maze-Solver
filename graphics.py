@@ -42,7 +42,62 @@ class Line:
             self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=fill_color, width=2
         )
 
+class Cell:
+    def __init__(self, x1, x2, y1, y2,win):
+        self.has_left_wall = True
+        self.has_right_wall = True
+        self.has_top_wall = True
+        self.has_bottom_wall = True
+        self.__x1 = x1
+        self.__x2 = x2
+        self.__y1 = y1
+        self.__y2 = y2
 
+        self.__win = win
+
+    def draw(self):
+        if self.has_left_wall == True:
+          # print("Drawing left wall")
+            start = Point(self.__x1, self.__y1)
+            end = Point(self.__x1, self.__y2)
+            line = Line(start,end)
+            self.__win.draw_line(line)
+
+        if self.has_right_wall == True:
+          # print("Drawing right wall")
+            start = Point(self.__x2, self.__y1)
+            end = Point(self.__x2, self.__y2)
+            line = Line(start,end)
+            self.__win.draw_line(line)
+# coordinate system is flipped in tkinter, y2 is bottom not top.
+        if self.has_top_wall == True:
+          # print("Drawing top wall")
+            start = Point(self.__x1, self.__y1)
+            end = Point(self.__x2, self.__y1)
+            line = Line(start, end)
+            self.__win.draw_line(line)
+
+        if self.has_bottom_wall == True:
+          # print("Drawing bottom wall")
+            start = Point(self.__x1, self.__y2)
+            end = Point(self.__x2, self.__y2)
+            line = Line(start,end)
+            self.__win.draw_line(line)
+
+    def draw_move(self, to_cell, undo=False):
+        from_midpoint = Point((self.__x1 + self.__x2)/2, (self.__y1 +self.__y2)/2)
+        to_midpoint = Point((to_cell.__x1 + to_cell.__x2)/2, (to_cell.__y1 + to_cell.__y2)/2)
+        line = Line(from_midpoint, to_midpoint)
+        if undo == False:
+            self.__win.draw_line(line, fill_color="red")
+        else:
+            self.__win.draw_line(line, fill_color="gray")
+
+
+
+
+        
+    
 
 
 
