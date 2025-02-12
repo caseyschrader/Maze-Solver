@@ -1,4 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
+import time
 
 class Window:
     def __init__(self, width, height):
@@ -43,44 +44,51 @@ class Line:
         )
 
 class Cell:
-    def __init__(self, x1, x2, y1, y2,win):
+    def __init__(self, win):
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
         self.has_bottom_wall = True
-        self.__x1 = x1
-        self.__x2 = x2
-        self.__y1 = y1
-        self.__y2 = y2
+        self._x1 = None
+        self._x2 = None
+        self._y1 = None
+        self._y2 = None
 
         self.__win = win
 
-    def draw(self):
+    def draw(self, x1, y1, x2, y2):
+        self._x1 = x1
+        self._x2 = x2
+        self._y1 = y1
+        self._y2 = y2
+
+
+
         if self.has_left_wall == True:
           # print("Drawing left wall")
-            start = Point(self.__x1, self.__y1)
-            end = Point(self.__x1, self.__y2)
+            start = Point(x1, y1)
+            end = Point(x1, y2)
             line = Line(start,end)
             self.__win.draw_line(line)
 
         if self.has_right_wall == True:
           # print("Drawing right wall")
-            start = Point(self.__x2, self.__y1)
-            end = Point(self.__x2, self.__y2)
+            start = Point(x2, y1)
+            end = Point(x2, y2)
             line = Line(start,end)
             self.__win.draw_line(line)
 # coordinate system is flipped in tkinter, y2 is bottom not top.
         if self.has_top_wall == True:
           # print("Drawing top wall")
-            start = Point(self.__x1, self.__y1)
-            end = Point(self.__x2, self.__y1)
+            start = Point(x1, y1)
+            end = Point(x2, y1)
             line = Line(start, end)
             self.__win.draw_line(line)
 
         if self.has_bottom_wall == True:
           # print("Drawing bottom wall")
-            start = Point(self.__x1, self.__y2)
-            end = Point(self.__x2, self.__y2)
+            start = Point(x1, y2)
+            end = Point(x2, y2)
             line = Line(start,end)
             self.__win.draw_line(line)
 
@@ -93,8 +101,53 @@ class Cell:
         else:
             self.__win.draw_line(line, fill_color="gray")
 
+class Maze:
+    def __init__(
+            self,
+            x1,
+            y1,
+            num_rows,
+            num_columns,
+            cell_size_x,
+            cell_size_y,
+            win,
+    ):
+        self.x1 = x1
+        self.y1 = y1
+        self.num_rows = num_rows
+        self.num_columns = num_columns
+        self.cell_size_x = cell_size_x
+        self.cell_size_y = cell_size_y
+        self._cells = []
+        self.win = win
 
+        self._create_cells()
 
+    def _create_cells(self):
+        for i in range(self.num_rows):
+            column = []
+            
+            for j in range(self.num_columns):
+                cell = Cell(self.win)
+                column.append(cell)
+            self._cells.append(column)
+        for i in range(self.num_rows):
+            for j in range(self.num_columns):
+                self._draw_cell(i,j)
+        
+    def _draw_cell(self, i, j):
+        x1 = self.x1 + (j * self.cell_size_x)
+        y1 = self.y1 + (i * self.cell_size_y)
+        x2 = x1 + self.cell_size_x
+        y2 = y1 + self.cell_size_y
+
+        cell = self._cells[i][j].draw(x1, y1, x2, y2)
+        self._animate()
+
+    def _animate(self):
+        self.win.redraw()
+        time.sleep(0.05)
+        
 
         
     
