@@ -44,7 +44,7 @@ class Line:
         )
 
 class Cell:
-    def __init__(self, win):
+    def __init__(self, win=None):
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
@@ -54,52 +54,70 @@ class Cell:
         self._y1 = None
         self._y2 = None
 
-        self.__win = win
+        self._win = win
 
     def draw(self, x1, y1, x2, y2):
+        if self._win is None:
+            return
         self._x1 = x1
         self._x2 = x2
         self._y1 = y1
         self._y2 = y2
+        
+        # left line
+        left_start = Point(x1, y1)
+        left_end = Point(x1, y2)
+        left_line = Line(left_start, left_end)
+        #right line
+        right_start = Point(x2, y1)
+        right_end = Point(x2, y2)
+        right_line = Line(right_start, right_end)
+        #top line
+        top_start = Point(x1, y1)
+        top_end = Point(x2, y1)
+        top_line = Line(top_start, top_end)
+        #bottom line
+        bottom_start = Point(x1, y2)
+        bottom_end = Point(x2, y2)
+        bottom_line = Line(bottom_start, bottom_end)
+
+        if self.has_left_wall:
+            self._win.draw_line(left_line)
+        else:
+            self._win.draw_line(left_line, fill_color="white")
+
+        if self.has_right_wall:
+            self._win.draw_line(right_line)
+        else:
+            self._win.draw_line(right_line, fill_color="white")
+        
+        if self.has_top_wall:
+            self._win.draw_line(top_line)
+        else:
+            self._win.draw_line(top_line, fill_color="white")
+        
+        if self.has_bottom_wall:
+            self._win.draw_line(bottom_line)
+        else:
+            self._win.draw_line(bottom_line, fill_color="white")
+        
+        
+
+        
 
 
 
-        if self.has_left_wall == True:
-          # print("Drawing left wall")
-            start = Point(x1, y1)
-            end = Point(x1, y2)
-            line = Line(start,end)
-            self.__win.draw_line(line)
+            
 
-        if self.has_right_wall == True:
-          # print("Drawing right wall")
-            start = Point(x2, y1)
-            end = Point(x2, y2)
-            line = Line(start,end)
-            self.__win.draw_line(line)
-# coordinate system is flipped in tkinter, y2 is bottom not top.
-        if self.has_top_wall == True:
-          # print("Drawing top wall")
-            start = Point(x1, y1)
-            end = Point(x2, y1)
-            line = Line(start, end)
-            self.__win.draw_line(line)
-
-        if self.has_bottom_wall == True:
-          # print("Drawing bottom wall")
-            start = Point(x1, y2)
-            end = Point(x2, y2)
-            line = Line(start,end)
-            self.__win.draw_line(line)
 
     def draw_move(self, to_cell, undo=False):
         from_midpoint = Point((self.__x1 + self.__x2)/2, (self.__y1 +self.__y2)/2)
         to_midpoint = Point((to_cell.__x1 + to_cell.__x2)/2, (to_cell.__y1 + to_cell.__y2)/2)
         line = Line(from_midpoint, to_midpoint)
         if undo == False:
-            self.__win.draw_line(line, fill_color="red")
+            self._win.draw_line(line, fill_color="red")
         else:
-            self.__win.draw_line(line, fill_color="gray")
+            self._win.draw_line(line, fill_color="gray")
 
 class Maze:
     def __init__(
@@ -110,7 +128,7 @@ class Maze:
             num_columns,
             cell_size_x,
             cell_size_y,
-            win,
+            win=None,
     ):
         self.x1 = x1
         self.y1 = y1
@@ -119,23 +137,26 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self._cells = []
-        self.win = win
+        self._win = win
+
 
         self._create_cells()
 
     def _create_cells(self):
-        for i in range(self.num_rows):
+        for i in range(self.num_columns):
             column = []
             
-            for j in range(self.num_columns):
-                cell = Cell(self.win)
+            for j in range(self.num_rows):
+                cell = Cell(self._win)
                 column.append(cell)
             self._cells.append(column)
-        for i in range(self.num_rows):
-            for j in range(self.num_columns):
+        for i in range(self.num_columns):
+            for j in range(self.num_rows):
                 self._draw_cell(i,j)
         
     def _draw_cell(self, i, j):
+        if self._win is None:
+            return
         x1 = self.x1 + (j * self.cell_size_x)
         y1 = self.y1 + (i * self.cell_size_y)
         x2 = x1 + self.cell_size_x
@@ -145,9 +166,21 @@ class Maze:
         self._animate()
 
     def _animate(self):
-        self.win.redraw()
+        if self._win is None:
+            return
+        self._win.redraw()
         time.sleep(0.05)
         
+    def _break_entrance_and_exit(self):
+        entrance_cell = self._cells[0][0]
+        exit_cell = self._cells[-1][-1]
+
+        entrance_cell.has_top_wall = False
+        exit_cell.has_bottom_wall = False
+
+
+
+
 
         
     
